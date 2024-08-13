@@ -79,6 +79,17 @@ app.get('/api/getUserData/:name', async (req, res) => {
     }
 });
 
+// API route to get all users
+app.get('/api/getAllUsers', async (req, res) => {
+    try {
+      const collection = db.collection('userdatas');
+      const users = await collection.find({}).toArray();
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching users', error: error.toString() });
+    }
+  });
+
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

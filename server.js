@@ -47,6 +47,38 @@ app.post('/api/saveUserData', async (req, res) => {
     }
 });
 
+//API route to return user info for card creation
+// API route to get user data by name or another unique identifier
+app.get('/api/getUserData/:name', async (req, res) => {
+    const { name } = req.params;
+
+    try {
+        const collection = db.collection('userdatas');
+        const user = await collection.findOne({ name });
+
+        if (user) {
+            // Provide default values if fields are missing
+            const responseData = {
+                name: user.name || name,
+                status: user.status || 'No status set',
+                officeNumber: user.officeNumber || 'No office number set',
+                quote: user.quote || 'No quote set'
+            };
+            res.status(200).json(responseData);
+        } else {
+            // If user is not found, send default data
+            res.status(200).json({
+                name: name,
+                status: 'No status set',
+                officeNumber: 'No office number set',
+                quote: 'No quote set'
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching data', error: error.toString() });
+    }
+});
+
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

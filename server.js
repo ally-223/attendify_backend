@@ -24,7 +24,7 @@ MongoClient.connect(mongoURI, {
 
 // API route to save or update user data
 app.post('/api/saveUserData', async (req, res) => {
-    const { name, status, officeNumber, quote } = req.body;
+    const { name, status, officeNumber, quote, photoURL } = req.body;
   
     try {
         const collection = db.collection('userdatas'); 
@@ -34,12 +34,12 @@ app.post('/api/saveUserData', async (req, res) => {
             // If user exists, update their data
             await collection.updateOne(
                 { _id: existingUser._id },
-                { $set: { status, officeNumber, quote } }
+                { $set: { status, officeNumber, quote, photoURL } }
             );
             res.status(200).json({ message: 'User data updated successfully!' });
         } else {
             // If user does not exist, create a new one
-            const result = await collection.insertOne({ name, status, officeNumber, quote });
+            const result = await collection.insertOne({ name, status, officeNumber, quote, photoURL });
             res.status(201).json({ message: 'Data saved successfully!', id: result.insertedId });
         }
     } catch (error) {
@@ -62,7 +62,8 @@ app.get('/api/getUserData/:name', async (req, res) => {
                 name: user.name || name,
                 status: user.status || 'No status set',
                 officeNumber: user.officeNumber || 'No office number set',
-                quote: user.quote || 'No quote set'
+                quote: user.quote || 'No quote set',
+                photoURL: user.photoURL || null  // Add this line
             };
             res.status(200).json(responseData);
         } else {
@@ -71,7 +72,8 @@ app.get('/api/getUserData/:name', async (req, res) => {
                 name: name,
                 status: 'No status set',
                 officeNumber: 'No office number set',
-                quote: 'No quote set'
+                quote: 'No quote set',
+                photoURL: null  // Add this line
             });
         }
     } catch (error) {
@@ -84,14 +86,15 @@ app.get('/api/getAllUsers', async (req, res) => {
     try {
       const collection = db.collection('userdatas');
       const users = await collection.find({}).toArray();
-      res.status(200).json(users);
+      res.status(200).json(users);  // This will now include photoURL for each user
     } catch (error) {
       res.status(500).json({ message: 'Error fetching users', error: error.toString() });
     }
-  });
+});
 
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+

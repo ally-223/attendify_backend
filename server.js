@@ -24,7 +24,7 @@ MongoClient.connect(mongoURI, {
 
 // API route to save or update user data
 app.post('/api/saveUserData', async (req, res) => {
-    const { name, status, officeNumber, quote, photoURL } = req.body;
+    const { name, status, officeNumber, quote, photoURL, lastSubmitTime} = req.body;
   
     try {
         const collection = db.collection('userdatas'); 
@@ -34,12 +34,12 @@ app.post('/api/saveUserData', async (req, res) => {
             // If user exists, update their data
             await collection.updateOne(
                 { _id: existingUser._id },
-                { $set: { status, officeNumber, quote, photoURL } }
+                { $set: { status, officeNumber, quote, photoURL, lastSubmitTime} }
             );
             res.status(200).json({ message: 'User data updated successfully!' });
         } else {
             // If user does not exist, create a new one
-            const result = await collection.insertOne({ name, status, officeNumber, quote, photoURL });
+            const result = await collection.insertOne({ name, status, officeNumber, quote, photoURL, lastSubmitTime });
             res.status(201).json({ message: 'Data saved successfully!', id: result.insertedId });
         }
     } catch (error) {
@@ -63,7 +63,8 @@ app.get('/api/getUserData/:name', async (req, res) => {
                 status: user.status || 'No status set',
                 officeNumber: user.officeNumber || 'No office number set',
                 quote: user.quote || 'No quote set',
-                photoURL: user.photoURL || null  // Add this line
+                photoURL: user.photoURL || null ,  
+                lastSubmitTime: user.lastSubmitTime || null
             };
             res.status(200).json(responseData);
         } else {
@@ -73,7 +74,8 @@ app.get('/api/getUserData/:name', async (req, res) => {
                 status: 'No status set',
                 officeNumber: 'No office number set',
                 quote: 'No quote set',
-                photoURL: null  // Add this line
+                photoURL: null ,
+                lastSubmitTime: null
             });
         }
     } catch (error) {
